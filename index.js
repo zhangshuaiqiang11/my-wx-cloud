@@ -4,6 +4,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const fetch = require("node-fetch");
 const logger = morgan("tiny");
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
 app.use(express.urlencoded({ extended: false }));
@@ -14,7 +15,7 @@ app.use(logger);
 const key = 'sk-f2WN7h04QbO5cTCIRbzhNapSrHLmxqUwxh9xMGKgVOrb2pVN'
 
 app.post('/proxy-reply', async (req, res) => {
-  // const userInput = req.body.input;
+  const userInput = req.body.input;
 
   try {
     const response = await fetch('http://47.115.150.165/lanxi/api/v1/chat/completions', {
@@ -29,7 +30,7 @@ app.post('/proxy-reply', async (req, res) => {
         "messages": [
             {
                 "role": "user",
-                "content": "hi,Mr.Zhang,请你后面都叫我 张先生"
+                "content": userInput
             }
         ]
     })
