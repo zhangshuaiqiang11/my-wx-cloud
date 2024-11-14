@@ -2,8 +2,7 @@ const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const { createProxyMiddleware } = require('http-proxy-middleware');
-
+const fetch = require("node-fetch");
 const logger = morgan("tiny");
 
 const app = express();
@@ -12,25 +11,36 @@ app.use(express.json());
 app.use(cors());
 app.use(logger);
 
-app.use('/api1', createProxyMiddleware({
-  target: "https://api.f2gpt.com/v1/chat/completions", // 目标API的URL
-  changeOrigin: true, // 修改请求头的origin为目标API的origin
-  pathRewrite: {
-    '^/api1': '', // 去掉代理请求中的 `/api` 前缀
-  },
-  onProxyReq: (proxyReq, req, res) => {
-    // 如果目标API需要API_KEY，可以在请求头中添加
-    // if (process.env.OPENAI_API_KEY) {
-      proxyReq.setHeader('Authorization', `Bearer ${process.env.MY_KEY}`);
-      res.status(500).json({ error: 'Proxy error occurred' });
-    // }
-  },
-  onError: (err, req, res) => {
-    console.error('Proxy error:', err);
-    res.status(500).json({ error: 'Proxy error occurred' });
-  }
-}));
+const key = 'sk-f2WN7h04QbO5cTCIRbzhNapSrHLmxqUwxh9xMGKgVOrb2pVN'
 
+app.post('/proxy-reply', async (req, res) => {
+  // const userInput = req.body.input;
+
+  try {
+    const response = await fetch('http://47.115.150.165/lanxi/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`
+      },
+      body: JSON.stringify({
+        "model": "gpt-3.5-turbo",
+        "temperature": 0.7,
+        "messages": [
+            {
+                "role": "user",
+                "content": "hi,Mr.Zhang,请你后面都叫我 张先生"
+            }
+        ]
+    })
+    });
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // 首页
 app.get("/", async (req, res) => {
