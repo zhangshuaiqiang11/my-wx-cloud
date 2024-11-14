@@ -16,7 +16,7 @@ const key = 'sk-f2WN7h04QbO5cTCIRbzhNapSrHLmxqUwxh9xMGKgVOrb2pVN'
 
 app.post('/proxy-reply', async (req, res) => {
   const userInput = req.body.input;
-
+  const isStream = req.body.isStream;
   try {
     const response = await fetch('http://47.115.150.165/lanxi/api/v1/chat/completions', {
       method: 'POST',
@@ -27,6 +27,7 @@ app.post('/proxy-reply', async (req, res) => {
       body: JSON.stringify({
         "model": "gpt-3.5-turbo",
         "temperature": 0.7,
+        "stream": isStream || false,
         "messages": [
             {
                 "role": "user",
